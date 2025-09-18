@@ -1,0 +1,64 @@
+/*
+ * Copyright (c) 2025 Advanced Micro Devices, Inc.
+ *
+ * SPDX-License-Identifier: Apache-2.0
+ *
+ */
+
+/dts-v1/;
+#include <arm/xilinx/zynqmp_rpu.dtsi>
+
+/ {
+	model = "KV260 Cortex-R5";
+	compatible = "xlnx,zynqmp-r5";
+
+	sram0: memory@100000 {
+		compatible = "mmio-sram";
+		reg = <0x100000 0x7fefffff>;
+	};
+
+	chosen {
+		zephyr,sram = &sram0;
+		zephyr,flash = &flash0;
+		zephyr,console = &uart1;
+		zephyr,shell-uart = &uart1;
+		zephyr,ocm = &ocm;
+	};
+};
+
+&uart1 {
+	status = "okay";
+	current-speed = <115200>;
+	clock-frequency = <99999901>;
+};
+
+&ttc0 {
+	status = "okay";
+	clock-frequency = <100000000>;
+};
+
+&psgpio {
+	status = "okay";
+};
+
+&gem3 {
+        status = "okay";
+	phy-handle = <&gem3_phy>;
+	clock-frequency = <125000000>;
+        local-mac-address = [00 00 00 01 02 03];
+};
+
+&gem3_mdio {
+	compatible = "xlnx,gem-mdio";
+	status = "okay";
+
+	gem3_phy: phy@c {
+		compatible = "ti,dp83867";
+		reg = <0xc>;
+		status = "okay";
+		ti,interface-type = "rgmii-id";
+		ti,rx-internal-delay = <0x8>;
+		ti,tx-internal-delay = <0xa>;
+
+	};
+};

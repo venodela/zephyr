@@ -5,22 +5,13 @@
  */
 
 #include <zephyr/kernel.h>
-#include <zephyr/arch/arm/cortex_m/arm_mpu_mem_cfg.h>
+#include <zephyr/arch/arm/cortex_a_r/arm_mpu_mem_cfg.h>
 
 extern const uint32_t __rom_region_start;
 extern const uint32_t __rom_region_mpu_size_bits;
 
 static const struct arm_mpu_region mpu_regions[] = {
-	/*
-	 * The address of the vectors is determined by arch/arm/core/cortex_a_r/prep_c.c
-	 * -> for v7-R, there's no other option than 0x0, HIVECS always gets cleared
-	 */
-	MPU_REGION_ENTRY(
-		"vectors",
-		0x00000000,
-		REGION_64B,
-		{.rasr = P_RO_U_NA_Msk |
-			 NORMAL_OUTER_INNER_NON_CACHEABLE_NON_SHAREABLE}),
+
 	/* Basic SRAM mapping is all data, R/W + XN */
 	MPU_REGION_ENTRY(
 		"sram",
@@ -55,6 +46,18 @@ static const struct arm_mpu_region mpu_regions[] = {
 		{.rasr = P_RO_U_RO_Msk |
 			 NORMAL_OUTER_INNER_WRITE_BACK_WRITE_READ_ALLOCATE_NON_SHAREABLE}),
 #endif /* CONFIG_XIP */
+
+	/*
+	 * The address of the vectors is determined by arch/arm/core/cortex_a_r/prep_c.c
+	 * -> for v7-R, there's no other option than 0x0, HIVECS always gets cleared
+	 */
+	MPU_REGION_ENTRY(
+		"vectors",
+		0x00000000,
+		REGION_64B,
+		{.rasr = P_RO_U_NA_Msk |
+			 NORMAL_OUTER_INNER_NON_CACHEABLE_NON_SHAREABLE}),
+
 	MPU_REGION_ENTRY(
 		"peripherals",
 		0xf8000000,

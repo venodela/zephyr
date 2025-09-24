@@ -1538,7 +1538,7 @@ static void eth_xlnx_gem_phy_cb(const struct device *phy,
 	}
 
 	if (state->is_up) {
-		eth_xlnx_gem_configure_clocks(dev, state);
+		/*eth_xlnx_gem_configure_clocks(dev, state);*/
 		eth_xlnx_gem_set_nwcfg_link_speed(dev, state);
 		net_eth_carrier_on(dev_data->iface);
 	} else {

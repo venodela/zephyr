@@ -148,27 +148,28 @@
 
 /*
  * Register offsets within the respective GEM's address space:
- * NWCTRL    = gem.net_ctrl             Network Control              register
- * NWCFG     = gem.net_cfg              Network Configuration        register
- * NWSR      = gem.net_status           Network Status               register
- * DMACR     = gem.dma_cfg              DMA Control                  register
- * TXSR      = gem.tx_status            TX Status                    register
- * RXQBASE   = gem.rx_qbar              RXQ base address             register
- * TXQBASE   = gem.tx_qbar              TXQ base address             register
- * RXSR      = gem.rx_status            RX Status                    register
- * ISR       = gem.intr_status          Interrupt status             register
- * IER       = gem.intr_en              Interrupt enable             register
- * IDR       = gem.intr_dis             Interrupt disable            register
- * IMR       = gem.intr_mask            Interrupt mask               register
- * PHYMNTNC  = gem.phy_maint            PHY maintenance              register
- * LADDR1L   = gem.spec_addr1_bot       Specific address 1 bottom    register
- * LADDR1H   = gem.spec_addr1_top       Specific address 1 top       register
- * LADDR2L   = gem.spec_addr2_bot       Specific address 2 bottom    register
- * LADDR2H   = gem.spec_addr2_top       Specific address 2 top       register
- * LADDR3L   = gem.spec_addr3_bot       Specific address 3 bottom    register
- * LADDR3H   = gem.spec_addr3_top       Specific address 3 top       register
- * LADDR4L   = gem.spec_addr4_bot       Specific address 4 bottom    register
- * LADDR4H   = gem.spec_addr4_top       Specific address 4 top       register
+ * NWCTRL      = gem.net_ctrl       Network Control           register
+ * NWCFG       = gem.net_cfg        Network Configuration     register
+ * NWSR        = gem.net_status     Network Status            register
+ * DMACR       = gem.dma_cfg        DMA Control               register
+ * TXSR        = gem.tx_status      TX Status                 register
+ * RXQBASE     = gem.rx_qbar        RXQ base address          register
+ * TXQBASE     = gem.tx_qbar        TXQ base address          register
+ * RXSR        = gem.rx_status      RX Status                 register
+ * ISR         = gem.intr_status    Interrupt status          register
+ * IER         = gem.intr_en        Interrupt enable          register
+ * IDR         = gem.intr_dis       Interrupt disable         register
+ * IMR         = gem.intr_mask      Interrupt mask            register
+ * PHYMNTNC    = gem.phy_maint      PHY maintenance           register
+ * LADDR1L     = gem.spec_addr1_bot Specific address 1 bottom register
+ * LADDR1H     = gem.spec_addr1_top Specific address 1 top    register
+ * LADDR2L     = gem.spec_addr2_bot Specific address 2 bottom register
+ * LADDR2H     = gem.spec_addr2_top Specific address 2 top    register
+ * LADDR3L     = gem.spec_addr3_bot Specific address 3 bottom register
+ * LADDR3H     = gem.spec_addr3_top Specific address 3 top    register
+ * LADDR4L     = gem.spec_addr4_bot Specific address 4 bottom register
+ * LADDR4H     = gem.spec_addr4_top Specific address 4 top    register
+ * DESIGN_CFG5 = gem.design_cfg5    Design Configuration 5    register
  * UltraScale specific extensions:
  * TX1QBASEL = gem.transmit_q1_ptr      64-bit TXQ low address word  register
  * TX1QBASEH = gem.upper_tx_q_base_addr 64-bit TXQ high address word register
@@ -196,6 +197,7 @@
 #define ETH_XLNX_GEM_LADDR3H_OFFSET			0x0000009C
 #define ETH_XLNX_GEM_LADDR4L_OFFSET			0x000000A0
 #define ETH_XLNX_GEM_LADDR4H_OFFSET			0x000000A4
+#define ETH_XLNX_GEM_DESIGN_CFG5_OFFSET		0x00000290
 #ifdef CONFIG_SOC_XILINX_ZYNQMP
 #define ETH_XLNX_GEM_TX1QBASEL_OFFSET			0x00000440
 #define ETH_XLNX_GEM_TX1QBASEH_OFFSET			0x000004C8
@@ -383,6 +385,13 @@
 #define ETH_XLNX_GEM_IXR_ALL_MASK			0x03FC7FFE
 #define ETH_XLNX_GEM_IXR_ERRORS_MASK			0x00000C60
 
+/*
+ * gem.design_cfg5:
+ * [11 .. 10] Data bus width of the current target SoC
+ *            (mask identical with ETH_XLNX_GEM_NWCFG_DBUSW_MASK)
+ */
+#define ETH_XLNX_GEM_DESIGN_CFG5_DBUSW_SHIFT		10
+
 /* Device initialization macro */
 #define ETH_XLNX_GEM_NET_DEV_INIT(port)\
 ETH_NET_DEVICE_DT_INST_DEFINE(port,\
@@ -412,8 +421,6 @@ static const struct eth_xlnx_gem_dev_cfg eth_xlnx_gem##port##_dev_cfg = {\
 	.clk_ctrl_reg_address		= DT_REG_ADDR_BY_IDX(DT_INST(port, xlnx_gem), 1),\
 	.defer_rxp_to_queue		= !DT_INST_PROP(port, handle_rx_in_isr),\
 	.defer_txd_to_queue		= DT_INST_PROP(port, handle_tx_in_workq),\
-	.amba_dbus_width		= (enum eth_xlnx_amba_dbus_width)\
-		(DT_INST_PROP(port, amba_ahb_dbus_width)),\
 	.ahb_burst_length		= (enum eth_xlnx_ahb_burst_length)\
 		(DT_INST_PROP(port, amba_ahb_burst_length)),\
 	.hw_rx_buffer_size		= (enum eth_xlnx_hwrx_buffer_size)\
@@ -543,20 +550,6 @@ typedef void (*eth_xlnx_gem_config_irq_t)(const struct device *dev);
 /* Enums for bitfields representing configuration settings */
 
 /**
- * @brief AMBA AHB data bus width configuration enumeration type.
- *
- * Enumeration type containing the supported width options for the
- * AMBA AHB data bus. This is a configuration item in the controller's
- * net_cfg register.
- */
-enum eth_xlnx_amba_dbus_width {
-	/* The values of this enum are consecutively numbered */
-	AMBA_AHB_DBUS_WIDTH_32BIT = 0,
-	AMBA_AHB_DBUS_WIDTH_64BIT,
-	AMBA_AHB_DBUS_WIDTH_128BIT
-};
-
-/**
  * @brief DMA RX buffer size configuration enumeration type.
  *
  * Enumeration type containing the supported size options for the
@@ -656,7 +649,6 @@ struct eth_xlnx_gem_dev_cfg {
 	uint8_t				defer_rxp_to_queue;
 	uint8_t				defer_txd_to_queue;
 
-	enum eth_xlnx_amba_dbus_width	amba_dbus_width;
 	enum eth_xlnx_ahb_burst_length	ahb_burst_length;
 	enum eth_xlnx_hwrx_buffer_size	hw_rx_buffer_size;
 	uint8_t				hw_rx_buffer_offset;

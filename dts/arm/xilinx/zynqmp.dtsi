@@ -200,8 +200,8 @@
 			hw-tx-buffer-size-full;
 			rx-buffer-descriptors = <32>;
 			tx-buffer-descriptors = <32>;
-			rx-buffer-size = <512>;
-			tx-buffer-size = <512>;
+			rx-buffer-size = <1536>;
+			tx-buffer-size = <1536>;
 			discard-rx-fcs;
 			unicast-hash;
 		};

@@ -458,6 +458,9 @@ static int eth_xlnx_gem_send(const struct device *dev, struct net_pkt *pkt)
 		sys_write32(reg_val, reg_ctrl);
 	}
 
+	/* Ensure all BD updates are visible before starting TX */
+	barrier_dsync_fence_full();
+
 	/* Set the start TX bit in the gem.net_ctrl register */
 	reg_val  = sys_read32(dev_conf->base_addr + ETH_XLNX_GEM_NWCTRL_OFFSET);
 	reg_val |= ETH_XLNX_GEM_NWCTRL_STARTTX_BIT;
@@ -1384,7 +1387,11 @@ static void eth_xlnx_gem_handle_rx_pending(const struct device *dev)
 					(void *)(dev_data->rx_bd_ring.first_bd[curr_bd_idx].addr &
 					ETH_XLNX_GEM_RX_BD_BUFFER_ADDR_MASK),
 					dev_conf->rx_buffer_size);
+
 #endif
+				/* sync before reading data */
+				barrier_dsync_fence_full();
+
 				net_pkt_write(pkt, (const void *)
 					      (dev_data->rx_bd_ring.first_bd[curr_bd_idx].addr &
 					      ETH_XLNX_GEM_RX_BD_BUFFER_ADDR_MASK),
@@ -1406,6 +1413,9 @@ static void eth_xlnx_gem_handle_rx_pending(const struct device *dev)
 
 			curr_bd_idx = (curr_bd_idx + 1) % dev_conf->rx_bd_count;
 		} while (curr_bd_idx != ((last_bd_idx + 1) % dev_conf->rx_bd_count));
+
+		/* Ensure all BD updates are visible to hardware before re-enabling interrupts */
+		barrier_dsync_fence_full();
 
 		/* Propagate the received packet to the network stack */
 		if (pkt != NULL) {
@@ -1533,6 +1543,9 @@ static void eth_xlnx_gem_handle_tx_done(const struct device *dev)
 		(dev_data->tx_bd_ring.next_to_process + bds_processed) %
 		dev_conf->tx_bd_count;
 	dev_data->tx_bd_ring.free_bds += bds_processed;
+
+	/* Ensure all BD ring updates are visible */
+	barrier_dsync_fence_full();
 
 	if (dev_conf->defer_txd_to_queue) {
 		k_sem_give(&(dev_data->tx_bd_ring.ring_sem));

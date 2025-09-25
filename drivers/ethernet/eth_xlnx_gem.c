@@ -417,8 +417,7 @@ static int eth_xlnx_gem_send(const struct device *dev, struct net_pkt *pkt)
 			     tx_data_remaining : dev_conf->tx_buffer_size);
 #ifdef CONFIG_CPU_HAS_DCACHE
 		arch_dcache_flush_range((void *)tx_buffer_offs,
-			(tx_data_remaining < dev_conf->tx_buffer_size) ?
-			tx_data_remaining : dev_conf->tx_buffer_size);
+			dev_conf->tx_buffer_size);
 #endif
 		/* Update current BD's control word */
 		reg_val = sys_read32(reg_ctrl) & (ETH_XLNX_GEM_TX_BD_WRAP_BIT |
@@ -1381,11 +1380,10 @@ static void eth_xlnx_gem_handle_rx_pending(const struct device *dev)
 		do {
 			if (pkt != NULL) {
 #ifdef CONFIG_CPU_HAS_DCACHE
-				arch_dcache_flush_range(
+				arch_dcache_invd_range(
 					(void *)(dev_data->rx_bd_ring.first_bd[curr_bd_idx].addr &
 					ETH_XLNX_GEM_RX_BD_BUFFER_ADDR_MASK),
-					(rx_data_remaining < dev_conf->rx_buffer_size) ?
-					rx_data_remaining : dev_conf->rx_buffer_size);
+					dev_conf->rx_buffer_size);
 #endif
 				net_pkt_write(pkt, (const void *)
 					      (dev_data->rx_bd_ring.first_bd[curr_bd_idx].addr &

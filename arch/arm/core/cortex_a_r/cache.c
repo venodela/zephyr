@@ -104,7 +104,7 @@ int arch_dcache_flush_range(void *start_addr, size_t size)
 	addr &= ~(line_size - 1);
 
 	while (addr < end_addr) {
-		L1C_CleanDCacheMVA((void *)addr);
+		L1C_CleanInvalidateDCacheMVA((void *)addr);
 		addr += line_size;
 	}
 

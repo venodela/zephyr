@@ -205,6 +205,10 @@ typedef struct {
 		_K_MEM_PARTITION_P_RX_U_RX |                                                       \
 		NORMAL_OUTER_INNER_WRITE_BACK_WRITE_READ_ALLOCATE_NON_SHAREABLE})
 
+#define K_MEM_PARTITION_P_RW_U_RW_STRONGLY_ORDERED                                                 \
+	((k_mem_partition_attr_t){                                                                 \
+		(_K_MEM_PARTITION_P_RW_U_RW | STRONGLY_ORDERED_SHAREABLE)})
+
 /*
  * @brief Evaluate Write-ability
  *

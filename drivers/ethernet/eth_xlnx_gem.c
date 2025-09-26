@@ -905,10 +905,6 @@ static void eth_xlnx_gem_set_initial_nwcfg(const struct device *dev)
 		/* [30]     ignore IPG rx_er */
 		reg_val |= ETH_XLNX_GEM_NWCFG_IGNIPGRXERR_BIT;
 	}
-	if (dev_conf->disable_reject_nsp) {
-		/* [29]     disable rejection of non-standard preamble */
-		reg_val |= ETH_XLNX_GEM_NWCFG_BADPREAMBEN_BIT;
-	}
 	if (dev_conf->enable_ipg_stretch) {
 		/* [28]     enable IPG stretch */
 		reg_val |= ETH_XLNX_GEM_NWCFG_IPG_STRETCH_BIT;
@@ -917,10 +913,6 @@ static void eth_xlnx_gem_set_initial_nwcfg(const struct device *dev)
 		/* [27]     SGMII mode enable */
 		reg_val |= ETH_XLNX_GEM_NWCFG_SGMIIEN_BIT;
 	}
-	if (dev_conf->disable_reject_fcs_crc_errors) {
-		/* [26]     disable rejection of FCS/CRC errors */
-		reg_val |= ETH_XLNX_GEM_NWCFG_FCSIGNORE_BIT;
-	}
 	if (dev_conf->enable_rx_halfdup_while_tx) {
 		/* [25]     RX half duplex while TX enable */
 		reg_val |= ETH_XLNX_GEM_NWCFG_HDRXEN_BIT;
@@ -928,10 +920,6 @@ static void eth_xlnx_gem_set_initial_nwcfg(const struct device *dev)
 	if (!dev_conf->disable_rx_chksum_offload) {
 		/* [24]     enable RX IP/TCP/UDP checksum offload */
 		reg_val |= ETH_XLNX_GEM_NWCFG_RXCHKSUMEN_BIT;
-	}
-	if (dev_conf->disable_pause_copy) {
-		/* [23]     Do not copy pause Frames to memory */
-		reg_val |= ETH_XLNX_GEM_NWCFG_PAUSECOPYDI_BIT;
 	}
 	/* [22..21] Data bus width -> obtain from design_cfg5 register */
 	design_cfg5_reg_val = sys_read32(dev_conf->base_addr + ETH_XLNX_GEM_DESIGN_CFG5_OFFSET);
@@ -1082,15 +1070,6 @@ static void eth_xlnx_gem_set_initial_dmacr(const struct device *dev)
 	const struct eth_xlnx_gem_dev_cfg *dev_conf = dev->config;
 	uint32_t reg_val = 0;
 
-	/*
-	 * gem.dma_cfg register bit (field) definitions:
-	 * comp. Zynq-7000 TRM, p. 1278 ff.
-	 */
-
-	if (dev_conf->disc_rx_ahb_unavail) {
-		/* [24] Discard RX packet when AHB unavailable */
-		reg_val |= ETH_XLNX_GEM_DMACR_DISCNOAHB_BIT;
-	}
 	/*
 	 * [23..16] DMA RX buffer size in AHB system memory
 	 *    e.g.: 0x02 = 128, 0x18 = 1536, 0xA0 = 10240

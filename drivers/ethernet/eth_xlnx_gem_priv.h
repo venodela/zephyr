@@ -419,14 +419,11 @@ static const struct eth_xlnx_gem_dev_cfg eth_xlnx_gem##port##_dev_cfg = {\
 	.config_func			= eth_xlnx_gem##port##_irq_config,\
 	.pll_clock_frequency		= DT_INST_PROP(port, clock_frequency),\
 	.clk_ctrl_reg_address		= DT_REG_ADDR_BY_IDX(DT_INST(port, xlnx_gem), 1),\
-	.defer_rxp_to_queue		= !DT_INST_PROP(port, handle_rx_in_isr),\
-	.defer_txd_to_queue		= DT_INST_PROP(port, handle_tx_in_workq),\
-	.ahb_burst_length		= (enum eth_xlnx_ahb_burst_length)\
-		(DT_INST_PROP(port, amba_ahb_burst_length)),\
-	.hw_rx_buffer_size		= (enum eth_xlnx_hwrx_buffer_size)\
-		(DT_INST_PROP(port, hw_rx_buffer_size)),\
-	.hw_rx_buffer_offset		= (uint8_t)\
-		(DT_INST_PROP(port, hw_rx_buffer_offset)),\
+	.defer_rxp_to_queue		= 1,\
+	.defer_txd_to_queue		= 0,\
+	.ahb_burst_length		= AHB_BURST_INCR16,\
+	.hw_rx_buffer_size		= HWRX_BUFFER_SIZE_8KB,\
+	.hw_rx_buffer_offset		= 0,\
 	.rx_bd_count			= (uint8_t)\
 		(DT_INST_PROP(port, rx_buffer_descriptors)),\
 	.tx_bd_count			= (uint8_t)\
@@ -435,31 +432,27 @@ static const struct eth_xlnx_gem_dev_cfg eth_xlnx_gem##port##_dev_cfg = {\
 		(ETH_XLNX_BUFFER_ALIGNMENT-1)) & ~(ETH_XLNX_BUFFER_ALIGNMENT-1)),\
 	.tx_buffer_size			= (((uint16_t)(DT_INST_PROP(port, tx_buffer_size)) +\
 		(ETH_XLNX_BUFFER_ALIGNMENT-1)) & ~(ETH_XLNX_BUFFER_ALIGNMENT-1)),\
-	.ignore_ipg_rxer		= DT_INST_PROP(port, ignore_ipg_rxer),\
-	.disable_reject_nsp		= DT_INST_PROP(port, disable_reject_nsp),\
-	.enable_ipg_stretch		= DT_INST_PROP(port, ipg_stretch),\
+	.ignore_ipg_rxer		= 0,\
+	.enable_ipg_stretch		= 0,\
 	.enable_sgmii_mode		= DT_INST_PROP(port, sgmii_mode),\
-	.disable_reject_fcs_crc_errors	= DT_INST_PROP(port, disable_reject_fcs_crc_errors),\
 	.enable_rx_halfdup_while_tx	= DT_INST_PROP(port, rx_halfdup_while_tx),\
 	.disable_rx_chksum_offload	= UTIL_OR(IS_ENABLED(CONFIG_QEMU_TARGET),\
 					  DT_INST_PROP(port, disable_rx_checksum_offload)),\
-	.disable_pause_copy		= DT_INST_PROP(port, disable_pause_copy),\
-	.discard_rx_fcs			= DT_INST_PROP(port, discard_rx_fcs),\
-	.discard_rx_length_errors	= DT_INST_PROP(port, discard_rx_length_errors),\
-	.enable_pause			= DT_INST_PROP(port, pause_frame),\
-	.enable_tbi			= DT_INST_PROP(port, tbi),\
-	.ext_addr_match			= DT_INST_PROP(port, ext_address_match),\
-	.enable_1536_frames		= DT_INST_PROP(port, long_frame_rx_support),\
-	.enable_ucast_hash		= DT_INST_PROP(port, unicast_hash),\
-	.enable_mcast_hash		= DT_INST_PROP(port, multicast_hash),\
-	.disable_bcast			= DT_INST_PROP(port, reject_broadcast),\
-	.discard_non_vlan		= DT_INST_PROP(port, discard_non_vlan),\
-	.disc_rx_ahb_unavail		= DT_INST_PROP(port, discard_rx_frame_ahb_unavail),\
+	.discard_rx_fcs			= 1,\
+	.discard_rx_length_errors	= 1,\
+	.enable_pause			= 1,\
+	.enable_tbi			= 0,\
+	.ext_addr_match			= 0,\
+	.enable_1536_frames		= 1,\
+	.enable_ucast_hash		= 1,\
+	.enable_mcast_hash		= 1,\
+	.disable_bcast			= 0,\
+	.discard_non_vlan		= 0,\
 	.disable_tx_chksum_offload	= UTIL_OR(IS_ENABLED(CONFIG_QEMU_TARGET),\
 					  DT_INST_PROP(port, disable_tx_checksum_offload)),\
-	.tx_buffer_size_full		= DT_INST_PROP(port, hw_tx_buffer_size_full),\
-	.enable_ahb_packet_endian_swap	= DT_INST_PROP(port, ahb_packet_endian_swap),\
-	.enable_ahb_md_endian_swap	= DT_INST_PROP(port, ahb_md_endian_swap)\
+	.tx_buffer_size_full		= 1,\
+	.enable_ahb_packet_endian_swap	= 0,\
+	.enable_ahb_md_endian_swap	= 0\
 };
 
 /* Device run-time data declaration macro */
